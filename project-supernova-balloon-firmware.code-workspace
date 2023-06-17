@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "supernova_firmware",
+			"path": "supernova_firmware"
+		}
+	],
+	"settings": {
+		// avoid showing the folder duplicated
+		"files.exclude": {
+			"supernova_firmware": true
+		}
+	}
+}
