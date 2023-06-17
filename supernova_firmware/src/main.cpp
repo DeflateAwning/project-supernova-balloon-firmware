@@ -1,25 +1,26 @@
 #include <Arduino.h>
-
+#include "hardware_drivers.h"
 
 // the setup function runs once when you press reset or power the board
 void setup() {
-  
-  Serial.begin(115200);
-  Serial.println("Boot starting.");
 
-  // initialize digital pin LED_BUILTIN as an output.
-  pinMode(5, OUTPUT);
-  pinMode(2, OUTPUT);
+	Serial.begin(115200);
+	Serial.println("Start setup().");
 
-  Serial.println("Boot complete.");
+	// init the LEDs
+	do_pin_init_actions();
+
+	Serial.println("Done setup().");
 }
 
 // the loop function runs over and over again forever
 void loop() {
-  digitalWrite(5, HIGH);
-  digitalWrite(2, HIGH);
-  delay(1000);                       // wait for a second
-  digitalWrite(5, LOW);
-  digitalWrite(2, LOW);
-  delay(1000);                       // wait for a second
+	Serial.println("Start loop().");
+	
+	set_debug_led_state(1);
+	delay(250);
+	set_debug_led_state(0);
+	delay(1000);
+
+	Serial.println("Done loop().");
 }
