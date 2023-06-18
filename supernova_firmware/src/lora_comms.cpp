@@ -9,6 +9,8 @@
 
 #define LoraSerial Serial2 // define the LoRa Serial port ID
 
+uint16_t message_seq_num = 0;
+
 void init_lora_serial() {
 	Serial.println("Start init_lora_serial()");
 	LoraSerial.begin(9600);
@@ -17,7 +19,7 @@ void init_lora_serial() {
 
 void lora_prep_to_send_command() {
 	// clear any pending actions
-	LoraSerial.println("");
+	//LoraSerial.println("");
 	LoraSerial.flush();
 	delay(100);
 
@@ -57,12 +59,12 @@ void receive_uart_data(HardwareSerial SerialPort, char* dest_array) {
 	}
 }
 
-void lora_send_command_and_receive_response(const char* command_str, uint16_t delay_ms) {
+void lora_exec_command_and_receive_response(const char* command_str, uint16_t delay_ms) {
 	char rx_buffer[255];
-	return lora_send_command_and_receive_response(command_str, rx_buffer, delay_ms);
+	return lora_exec_command_and_receive_response(command_str, rx_buffer, delay_ms);
 }
 
-void lora_send_command_and_receive_response(const char* command_str, char* result_dest, uint16_t delay_ms) {
+void lora_exec_command_and_receive_response(const char* command_str, char* result_dest, uint16_t delay_ms) {
 	lora_prep_to_send_command();
 	
 	// send the command
@@ -82,11 +84,9 @@ void lora_send_command_and_receive_response(const char* command_str, char* resul
 
 // sends the "AT" command, and expects the "+AT: OK" response; returns True if success, or False is failure
 bool lora_do_test_and_log() {
-	lora_prep_to_send_command();
-
 	// send the test command
 	char buffer[255];
-	lora_send_command_and_receive_response("AT", buffer, 250);
+	lora_exec_command_and_receive_response("AT", buffer, 250);
 
 	// TODO add return check
 	return true;
@@ -96,21 +96,19 @@ bool lora_do_test_and_log() {
 void lora_set_private_config() {
 	LoraSerial.println("Start lora_set_private_config()");
 
-	lora_prep_to_send_command();
-
 	char command_to_send[255];
 
 	// send DevEui
 	sprintf(command_to_send, "AT+ID=DevEui,\"%s\"", lora_private_dev_eui);
-	lora_send_command_and_receive_response(command_to_send, 1000);
+	lora_exec_command_and_receive_response(command_to_send, 1000);
 	
 	// send AppEui
 	sprintf(command_to_send, "AT+ID=AppEui,\"%s\"", lora_private_app_eui);
-	lora_send_command_and_receive_response(command_to_send, 1000);
+	lora_exec_command_and_receive_response(command_to_send, 1000);
 	
 	// send AppKey
 	sprintf(command_to_send, "AT+KEY=APPKEY,\"%s\"", lora_private_app_key);
-	lora_send_command_and_receive_response(command_to_send, 1000);
+	lora_exec_command_and_receive_response(command_to_send, 1000);
 
 	LoraSerial.println("Done lora_set_private_config()");
 }
@@ -119,12 +117,27 @@ void lora_set_private_config() {
 void lora_set_network_config() {
 	LoraSerial.println("Start lora_set_network_config()");
 
-	lora_prep_to_send_command();
-
-	lora_send_command_and_receive_response("AT+DR=US915", 1000);
-	lora_send_command_and_receive_response("AT+CH=NUM,8-15", 1000);
-	lora_send_command_and_receive_response("AT+MODE=LWOTAA", 1000);
+	lora_exec_command_and_receive_response("AT+DR=US915", 1000);
+	lora_exec_command_and_receive_response("AT+CH=NUM,8-15", 1000);
+	lora_exec_command_and_receive_response("AT+MODE=LWOTAA", 1000);
 
 	LoraSerial.println("Done lora_set_network_config()");
+
+}
+
+void lora_join() {
+	lora_exec_command_and_receive_response("AT+JOIN", 15000);
+
+	// TODO handle response
+	// TODO return faster than delay if it says "already joined"
+}
+
+void lora_send_str_and_seq(const char* str_to_send) {
+	char command_to_send[255];
+	sprintf(command_to_send, "AT+MSG=\"%s%d\"", str_to_send, message_seq_num++);
+	lora_exec_command_and_receive_response(command_to_send, 5000);
+
+	// TODO handle "Please join network first" response
+	// TODO figure out what's wrong with "Length error"
 
 }

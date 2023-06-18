@@ -17,9 +17,11 @@ void setup() {
 	lora_set_private_config();
 
 	// receive back the device IDs
-	lora_send_command_and_receive_response("AT+ID", 1000);
+	lora_exec_command_and_receive_response("AT+ID", 1000);
 
 	lora_set_network_config();
+
+	lora_join();
 
 	Serial.println("Done setup().");
 }
@@ -31,9 +33,11 @@ void loop() {
 	set_debug_led_state(1);
 	delay(250);
 	set_debug_led_state(0);
-	delay(1000);
+	delay(3000);
 
 	lora_do_test_and_log();
+
+	lora_send_str_and_seq("HELP_ADC");
 
 	Serial.println("Done loop().");
 }
