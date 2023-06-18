@@ -1,6 +1,11 @@
 
 #pragma once // only allow include once
 #include "Arduino.h"
+#include <thermistor.h>
+#include "DHT.h"
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_BMP280.h>
 
 // Hardware drivers for the Project Supernova Project
 
@@ -14,9 +19,14 @@
 #define PIN_DEBUG_LED 5
 #define PIN_GPS_UART_MOSI 2 // software serial
 #define PIN_GPS_UART_MISO 4
+#define PIN_HEATER_ENABLE 14
 
 #define LORA_UART_CHANNEL 2 // UART channel number 2
 
+#define TEMP_SENSOR_5 80 // This is thermistor 0
+#define TEMP_SENSOR_6 80 // This is thermistor 0
+#define DHTPIN 12     // Digital pin connected to the DHT senso
+#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
 // inits the core hardware pins
 void do_pin_init_actions();
 
@@ -37,6 +47,9 @@ double get_bmp280_temperature_c();
 
 // reads and returns the BMP280 pressure (in Pascals)
 double get_bmp280_pressure_pa();
+
+// reads and returns the BMP280 altitude (in mwtwea)
+double get_bmp280_altitude();
 
 // reads and returns the battery voltage
 double get_battery_voltage();
