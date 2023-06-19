@@ -21,7 +21,7 @@ void setup() {
 
 	lora_set_network_config();
 
-	lora_join();
+	//lora_join(); // FIXME re-enable
 
 	Serial.println("Done setup().");
 }
@@ -29,16 +29,7 @@ void setup() {
 // the loop function runs over and over again forever
 void loop() {
 	Serial.println("Start loop().");
-	Serial.printf("this is the on board temp %f C\n",get_onboard_temperature_c());
-	Serial.printf("this is the temp #1 %f C\n",get_thermistor_temperature_c(1));
-	Serial.printf("this is the temp #2 %f C\n",get_thermistor_temperature_c(2));
-	Serial.printf("this is the DHT temp %f C\n",get_dht22_temperature_c());
-	Serial.printf("this is the DHT humiditity #2 %lf \n",get_dht22_humidity_rh_pct());
-	Serial.printf("this is the bmp280 pressure %lf Pa\n",get_bmp280_pressure_pa());
-	Serial.printf("this is the bmp280 temp %lf C\n",get_bmp280_temperature_c());
-	Serial.printf("this is the bmp280 altitude %lf m\n",get_bmp280_altitude());
-	Serial.printf("this is the battery %lf mV\n",get_battery_voltage());
-	Serial.printf("this is the RTF %d \n",is_switch_ready_to_fly());
+
 	// Serial.printf("this is ADC beign tested %d \n",analogReadMilliVolts(27));
 	set_debug_led_state(1);
 	delay(250);
@@ -47,7 +38,21 @@ void loop() {
 
 	lora_do_test_and_log();
 
-	lora_send_str_and_seq("HELP_ADC");
+	//lora_send_str_and_seq("HELP_ADC");
+
+	Serial.printf("this is the probe 1 and 2 voltage: %d mV, %d mV\n", analog_read_mv(PIN_TEMP_SENSE_1), analog_read_mv(PIN_TEMP_SENSE_2));
+	Serial.printf("this is the probe 1 and 2 temperatures: %f C,  %f C\n", get_thermistor_temperature_c(1), get_thermistor_temperature_c(2));
+	
+	Serial.printf("this is the DHT temp %f C\n",get_dht22_temperature_c());
+	Serial.printf("this is the DHT humiditity #2 %lf \n",get_dht22_humidity_rh_pct());
+	Serial.printf("this is the bmp280 pressure %lf Pa\n",get_bmp280_pressure_pa());
+	Serial.printf("this is the bmp280 temp %lf C\n",get_bmp280_temperature_c());
+	Serial.printf("this is the bmp280 altitude %lf m\n",get_bmp280_altitude());
+	Serial.printf("this is the battery %lf mV\n",get_battery_voltage());
+	Serial.printf("this is the RTF switch state: %d \n",is_switch_ready_to_fly());
+
+	Serial.printf("this is the ESP32 internal temp: %lf C\n", get_internal_temperature_c());
+
 
 	Serial.println("Done loop().");
 }

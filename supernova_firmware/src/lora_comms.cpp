@@ -121,6 +121,9 @@ void lora_set_network_config() {
 	lora_exec_command_and_receive_response("AT+CH=NUM,8-15", 1000);
 	lora_exec_command_and_receive_response("AT+MODE=LWOTAA", 1000);
 
+	// set TX Power in dBm
+	lora_exec_command_and_receive_response("AT+POWER=4", 1000); // TODO confirm that this tx power value is what we want
+
 	LoraSerial.println("Done lora_set_network_config()");
 
 }
