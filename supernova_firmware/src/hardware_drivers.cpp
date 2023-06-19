@@ -1,8 +1,10 @@
 #include "hardware_drivers.h"
 #include "Arduino.h"
 
-DHT dht(DHTPIN, DHTTYPE);
+
+DHT dht(PIN_DHT_DATA, DHT_TYPE);
 Adafruit_BMP280 bmp;
+
 
 void do_pin_init_actions() {
 	Serial.println("Start do_pin_init_actions()");
@@ -13,7 +15,7 @@ void do_pin_init_actions() {
 	pinMode(PIN_TEMP_SENSE_1, INPUT);
 	pinMode(PIN_TEMP_SENSE_2, INPUT);
 	pinMode(PIN_BATT_SENSE, INPUT);
-	pinMode(PIN_DHT_DATA, INPUT);
+	// pinMode(PIN_DHT_DATA, INPUT);
 	pinMode(PIN_RTF_SWITCH, INPUT);
 	// pinMode(PIN_ONBOARD_TEMPERATURE_SENSOR, INPUT);
 	
@@ -35,6 +37,8 @@ void do_pin_init_actions() {
 		Adafruit_BMP280::FILTER_X16,      /* Filtering. */
 		Adafruit_BMP280::STANDBY_MS_500
 	); /* Standby time. */
+
+	dht.begin();
 
 	Serial.println("Done do_pin_init_actions()");
 }
@@ -95,10 +99,10 @@ double get_thermistor_temperature_c(int sensor_number) {
 }
 
 double get_dht22_temperature_c() {
-	return (double)dht.readTemperature();
+	return dht.readTemperature();
 }
 double get_dht22_humidity_rh_pct() {
-	return (double)dht.readHumidity();
+	return dht.readHumidity();
 }
 
 double get_bmp280_temperature_c() {
@@ -130,8 +134,9 @@ float get_internal_temperature_c() {
 
 	if (temp_c > 53.3 && temp_c < 53.4) {
 		// special case where the internal temp sensor isn't configured on this board or something
-		return -9999;
+		return -99;
 	}
 	return temp_c;
+
 }
 

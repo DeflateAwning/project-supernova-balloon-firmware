@@ -3,7 +3,7 @@
 #include "Arduino.h"
 #include "esp_adc_cal.h"
 
-#include "DHT.h"
+#include <DHT.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_BMP280.h>
@@ -15,7 +15,7 @@
 #define PIN_TEMP_SENSE_1 33
 #define PIN_TEMP_SENSE_2 32
 #define PIN_BATT_SENSE 27
-#define PIN_DHT_DATA 23 // pin was moved from D12 to D23
+#define PIN_DHT_DATA 26 // pin was moved from D12 to D23
 #define PIN_RTF_SWITCH 18
 #define PIN_DEBUG_LED 5
 #define PIN_GPS_UART_MOSI 2 // software serial
@@ -24,13 +24,13 @@
 
 #define TEMP_SENSOR_5 80 // This is thermistor 0
 #define TEMP_SENSOR_6 80 // This is thermistor 0
-#define DHTPIN 12     // Digital pin connected to the DHT senso
-#define DHTTYPE DHT22   // DHT 22  (AM2302), AM2321
+
+#define DHT_TYPE DHT11   // DHT 22  (AM2302), AM2321
 
 #define ADC_BIT_COUNT 12 // 12 bits gives analogRead values from 0 to 4095
 
 
-const uint32_t themistor_res_fixed = 33000; // fixed pull-up resistor
+const uint32_t themistor_res_fixed = 75000; // fixed pull-up resistor
 const uint32_t themistor_res_therm = 100000; // thermistor resistance at nominal temp
 const int8_t themistor_therm_nom = 25;    // nominal thermistor temp
 const uint16_t themistor_therm_b = 3950;    // thermistor B coefficient
@@ -72,8 +72,6 @@ float get_internal_temperature_c();
 bool is_switch_ready_to_fly();
 
 // TODO setup GPS module
-// TODO setup LoRa module
-
 
 // sets the board heater state to either on or off
 void set_board_heater_state(bool turn_on);
