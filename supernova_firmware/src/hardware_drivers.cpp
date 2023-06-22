@@ -193,11 +193,11 @@ void gps_update_data() {
 void gps_log_all_info() {
 
 	// Latitude in degrees (double)
-	Serial.print("GPS DATA: Latitude= "); 
-	Serial.print(gps.location.lat(), 6);      
+	Serial.print("GPS DATA: Latitude= ");
+	Serial.print(gps.location.lat(), 6);
 	// Longitude in degrees (double)
-	Serial.print(" Longitude= "); 
-	Serial.println(gps.location.lng(), 6); 
+	Serial.print(" Longitude= ");
+	Serial.println(gps.location.lng(), 6);
 
 	// Raw latitude in whole degrees
 	// Serial.print("GPS DATA: Raw latitude = "); 
@@ -247,12 +247,6 @@ void gps_log_all_info() {
 	// Raw speed in 100ths of a knot (i32)
 	Serial.print("GPS DATA: Raw speed in 100ths/knot = ");
 	Serial.println(gps.speed.value()); 
-	// Speed in knots (double)
-	Serial.print("GPS DATA: Speed in knots/h = ");
-	Serial.println(gps.speed.knots()); 
-	// Speed in miles per hour (double)
-	Serial.print("GPS DATA: Speed in miles/h = ");
-	Serial.println(gps.speed.mph()); 
 	// Speed in meters per second (double)
 	Serial.print("GPS DATA: Speed in m/s = ");
 	Serial.println(gps.speed.mps()); 
@@ -268,27 +262,18 @@ void gps_log_all_info() {
 	Serial.println(gps.course.deg()); 
 
 	// Raw altitude in centimeters (i32)
-	Serial.print("GPS DATA: Raw altitude in centimeters = "); 
-	Serial.println(gps.altitude.value()); 
+	Serial.print("GPS DATA: Raw altitude in centimeters = ");
+	Serial.println(gps.altitude.value());
 	// Altitude in meters (double)
-	Serial.print("GPS DATA: Altitude in meters = "); 
-	Serial.println(gps.altitude.meters()); 
-	// Altitude in miles (double)
-	Serial.print("GPS DATA: Altitude in miles = "); 
-	Serial.println(gps.altitude.miles()); 
-	// Altitude in kilometers (double)
-	Serial.print("GPS DATA: Altitude in kilometers = "); 
-	Serial.println(gps.altitude.kilometers()); 
-	// Altitude in feet (double)
-	Serial.print("GPS DATA: Altitude in feet = "); 
-	Serial.println(gps.altitude.feet()); 
+	Serial.print("GPS DATA: Altitude in meters = ");
+	Serial.println(gps.altitude.meters());
 
 	// Number of satellites in use (u32)
 	Serial.print("GPS DATA: Number of satellites in use = "); 
 	Serial.println(gps.satellites.value()); 
 
 	// Horizontal Dim. of Precision (100ths-i32)
-	Serial.print("GPS DATA: HDOP (100ths of a meter) = "); 
+	Serial.print("GPS DATA: HDOP (cm) = "); // TODO confirm the unit is cm
 	Serial.println(gps.hdop.value());
 
 }
