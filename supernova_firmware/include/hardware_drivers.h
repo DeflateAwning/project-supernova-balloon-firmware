@@ -1,3 +1,4 @@
+// Hardware drivers for the Project Supernova Project
 
 #pragma once // only allow include once
 #include "Arduino.h"
@@ -7,8 +8,8 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_BMP280.h>
-
-// Hardware drivers for the Project Supernova Project
+#include <HardwareSerial.h>
+#include <TinyGPS++.h>
 
 #define PIN_TEMP_V_PLUS 25
 //#define PIN_ONBOARD_TEMPERATURE_SENSOR 34 // DO NOT USE
@@ -34,6 +35,8 @@ const uint32_t themistor_res_fixed = 75000; // fixed pull-up resistor
 const uint32_t themistor_res_therm = 100000; // thermistor resistance at nominal temp
 const int8_t themistor_therm_nom = 25;    // nominal thermistor temp
 const uint16_t themistor_therm_b = 3950;    // thermistor B coefficient
+
+const uint32_t gps_baud_rate = 9600; // either 9600 or 4800
 
 // inits the core hardware pins
 void do_pin_init_actions();
@@ -81,3 +84,12 @@ void set_debug_led_state(bool turn_on);
 
 // read each sensor and log it out to the Serial
 void do_sensor_test();
+
+// reads bytes from GPS serial line, and passes them to the gps
+void gps_update_data();
+
+// log all GPS info
+void gps_log_all_info();
+
+// gets whether the GPS parser has received a new location
+bool gps_is_location_updated();

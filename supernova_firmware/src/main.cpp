@@ -42,6 +42,15 @@ void loop() {
 
 	do_sensor_test();
 
+	gps_update_data();
+	if (gps_is_location_updated()) {
+		gps_log_all_info();
+		// TODO store to the upcoming data frame, and store how long it's been since it's been updated
+	}
+	else {
+		Serial.println("GPS DATA: No update.");
+	}
+
 	delay(1000);
 
 	Serial.println("Done loop().");

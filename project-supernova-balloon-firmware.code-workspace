@@ -12,6 +12,11 @@
 		// avoid showing the folder duplicated
 		"files.exclude": {
 			"supernova_firmware": true
+		},
+		"files.associations": {
+			"xlocale": "cpp",
+			"optional": "cpp",
+			"system_error": "cpp"
 		}
 	}
 }

@@ -24,7 +24,7 @@ void lora_prep_to_send_command() {
 	delay(100);
 
 	// check for any incoming content
-	char buffer[255];
+	char buffer[MAX_LORA_RESPONSE_LENGTH];
 	receive_uart_data(LoraSerial, buffer);
 	if (buffer[0] != 0) {
 		Serial.print("lora_prep_to_send_command(): content was found in the buffer:|");
@@ -60,7 +60,7 @@ void receive_uart_data(HardwareSerial SerialPort, char* dest_array) {
 }
 
 void lora_exec_command_and_receive_response(const char* command_str, uint16_t delay_ms) {
-	char rx_buffer[255];
+	char rx_buffer[MAX_LORA_RESPONSE_LENGTH];
 	return lora_exec_command_and_receive_response(command_str, rx_buffer, delay_ms);
 }
 
@@ -85,7 +85,7 @@ void lora_exec_command_and_receive_response(const char* command_str, char* resul
 // sends the "AT" command, and expects the "+AT: OK" response; returns True if success, or False is failure
 bool lora_do_test_and_log() {
 	// send the test command
-	char buffer[255];
+	char buffer[MAX_LORA_RESPONSE_LENGTH];
 	lora_exec_command_and_receive_response("AT", buffer, 250);
 
 	// TODO add return check
