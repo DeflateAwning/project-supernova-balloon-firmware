@@ -56,8 +56,13 @@ uint16_t analog_read_mv(uint8_t pin_number) {
 	// source: https://deepbluembedded.com/esp32-adc-tutorial-read-analog-voltage-arduino/
 	uint16_t analog_read_val = analogRead(pin_number);
 
+	adc_unit_t adc_unit = ADC_UNIT_1;
+	if (pin_number == 2 || pin_number == 4 || pin_number == 25 || pin_number == 26 || pin_number == 27 || (pin_number >= 12 && pin_number <= 15)) {
+		adc_unit = ADC_UNIT_2;
+	}
+
 	esp_adc_cal_characteristics_t adc_chars;
-	esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars); // FIXME deal with ADC2 case
+	esp_adc_cal_characterize(adc_unit, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, 1100, &adc_chars);
 	return (esp_adc_cal_raw_to_voltage(analog_read_val, &adc_chars));
 }
 
@@ -118,7 +123,9 @@ double get_bmp280_altitude() {
 }
 
 double get_battery_voltage() {
-	return ((double) analog_read_mv(PIN_BATT_SENSE))/0.3197;
+	// Divider Ratio: 4.7k/22.7k = 0.207048x
+	// 12V battery/supply turns into 2.48V max
+	return ((double) analog_read_mv(PIN_BATT_SENSE))*(22.7/4.7);
 }
 
 bool is_switch_ready_to_fly() {
@@ -140,3 +147,17 @@ float get_internal_temperature_c() {
 
 }
 
+void do_sensor_test() {
+	
+	Serial.printf("SENSOR TEST: probe 1 and 2 voltage: %d mV, %d mV\n", analog_read_mv(PIN_TEMP_SENSE_1), analog_read_mv(PIN_TEMP_SENSE_2));
+	Serial.printf("SENSOR TEST: probe 1 and 2 temperatures: %f C,  %f C\n", get_thermistor_temperature_c(1), get_thermistor_temperature_c(2));
+	Serial.printf("SENSOR TEST: DHT temp %f C\n", get_dht22_temperature_c());
+	Serial.printf("SENSOR TEST: DHT humiditity %lf \n", get_dht22_humidity_rh_pct());
+	Serial.printf("SENSOR TEST: bmp280 pressure %lf Pa\n",get_bmp280_pressure_pa());
+	Serial.printf("SENSOR TEST: bmp280 temp %lf C\n",get_bmp280_temperature_c());
+	Serial.printf("SENSOR TEST: bmp280 altitude %lf m\n",get_bmp280_altitude());
+	Serial.printf("SENSOR TEST: battery voltage: %lf mV; raw BATT_SENSE read: %d mV\n", get_battery_voltage(), analog_read_mv(PIN_BATT_SENSE));
+	Serial.printf("SENSOR TEST: RTF switch state: %d \n", is_switch_ready_to_fly());
+	Serial.printf("SENSOR TEST: ESP32 internal temp: %lf C\n", get_internal_temperature_c());
+	
+}

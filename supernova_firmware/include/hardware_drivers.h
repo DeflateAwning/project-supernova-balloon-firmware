@@ -78,3 +78,6 @@ void set_board_heater_state(bool turn_on);
 
 // sets the D5 debug LED state
 void set_debug_led_state(bool turn_on);
+
+// read each sensor and log it out to the Serial
+void do_sensor_test();
