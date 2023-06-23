@@ -44,7 +44,10 @@ struct data_packet_1_t
 
 // converts a data_packet_1_t to a byte array, and then to a null-terminated hex string
 // provide a buffer at least MAX_DATA_PACKET_HEX_STRING_LENGTH bytes long
-void data_packet_1_to_hex_string(data_packet_1_t* packet, char* hex_str_buffer);
+void data_packet_1_to_hex_string(struct data_packet_1_t packet, char* hex_str_buffer);
+
+// logs out to serial the contents of the packet
+void log_data_packet_1_to_serial(struct data_packet_1_t);
 
 // log the sizes of each packet, just for info
 void packet_debug_log_sizes();

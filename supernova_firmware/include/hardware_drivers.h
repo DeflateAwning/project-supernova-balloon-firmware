@@ -83,7 +83,7 @@ void set_board_heater_state(bool turn_on);
 void set_debug_led_state(bool turn_on);
 
 // read each sensor and log it out to the Serial
-void do_sensor_test();
+void log_each_sensor_value();
 
 // reads bytes from GPS serial line, and passes them to the gps
 void gps_update_data();
@@ -98,4 +98,4 @@ bool gps_is_location_updated();
 uint32_t get_latest_gps_refresh_epoch_time_sec();
 
 // returns a filled data_packet_1 struct
-struct data_packet_1_t make_data_packet_1();
+struct data_packet_1_t make_data_packet_1(uint16_t packet_seq_num);

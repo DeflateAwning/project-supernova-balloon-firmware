@@ -9,12 +9,14 @@
 
 #define LoraSerial Serial2 // define the LoRa Serial port ID
 
-uint16_t message_seq_num = 0;
+
+uint16_t text_message_seq_num = 0;
 
 void init_lora_serial() {
 	Serial.println("Start init_lora_serial()");
 	LoraSerial.begin(9600);
 	Serial.println("Done init_lora_serial()");
+
 }
 
 void lora_prep_to_send_command() {
@@ -59,6 +61,23 @@ void receive_uart_data(HardwareSerial SerialPort, char* dest_array) {
 	}
 }
 
+void lora_exec_tx_command_and_receive_response(const char* at_command_str, const char* message_payload_str) {
+	uint16_t delay_ms = 5000; // TODO confirm this is a good value
+	
+	// prep command
+	char command_str[MAX_LORA_RESPONSE_LENGTH];
+	sprintf(command_str, "%s=\"%s\"", at_command_str, message_payload_str); // form string like: AT+MSG="Hello World"
+	
+	// send command and receive response
+	char rx_buffer[MAX_LORA_RESPONSE_LENGTH];
+	lora_exec_command_and_receive_response(command_str, rx_buffer, delay_ms);
+
+	// TODO deal with responses, like "Length error N", N>0
+	
+	
+	// TODO deal with responses, like "Length error N", N=0 (action: send an "AT+MSG" dummy command to clear uplink buffer)
+}
+
 void lora_exec_command_and_receive_response(const char* command_str, uint16_t delay_ms) {
 	char rx_buffer[MAX_LORA_RESPONSE_LENGTH];
 	return lora_exec_command_and_receive_response(command_str, rx_buffer, delay_ms);
@@ -70,7 +89,7 @@ void lora_exec_command_and_receive_response(const char* command_str, char* resul
 	// send the command
 	Serial.print("MCU->LoRa: >>");
 	Serial.println(command_str);
-	LoraSerial.println(command_str);
+	LoraSerial.println(command_str); // println executes it
 	LoraSerial.flush();
 
 	delay(delay_ms);
@@ -117,12 +136,18 @@ void lora_set_private_config() {
 void lora_set_network_config() {
 	LoraSerial.println("Start lora_set_network_config()");
 
-	lora_exec_command_and_receive_response("AT+DR=US915", 1000);
-	lora_exec_command_and_receive_response("AT+CH=NUM,8-15", 1000);
-	lora_exec_command_and_receive_response("AT+MODE=LWOTAA", 1000);
+	lora_exec_command_and_receive_response("AT+DR=US915", 500);
+	lora_exec_command_and_receive_response("AT+DR=DR2", 500); // TODO remove this hard-code, and instead cycle through them
+	// lora_exec_command_and_receive_response("AT+DR=SF10", 500); // lower spreading factor = lower transmission range (but it's set through the DRx command)
+	lora_exec_command_and_receive_response("AT+CH=NUM,8-15", 500);
+	lora_exec_command_and_receive_response("AT+MODE=LWOTAA", 500);
 
 	// set TX Power in dBm
-	lora_exec_command_and_receive_response("AT+POWER=22", 1000); // appears that 20 dBm is the default and 22 dBm is the max
+	lora_exec_command_and_receive_response("AT+POWER=22", 500); // appears that 20 dBm is the default and 22 dBm is the max
+
+	// print out a few confirmation commands
+	lora_exec_command_and_receive_response("AT+LW=LEN", 500); // view max length of packet
+	lora_exec_command_and_receive_response("AT+DR", 500); // view data rate settings
 
 	LoraSerial.println("Done lora_set_network_config()");
 
@@ -136,9 +161,12 @@ void lora_join() {
 }
 
 void lora_send_str_and_seq(const char* str_to_send) {
+	// NOTE: thing function is mostly for testing purposes, and is now deprecated
 	char command_to_send[255];
-	sprintf(command_to_send, "AT+MSG=\"%s%d\"", str_to_send, message_seq_num++);
+	sprintf(command_to_send, "AT+MSG=\"%s%d\"", str_to_send, text_message_seq_num++);
 	lora_exec_command_and_receive_response(command_to_send, 5000);
+
+	// TODO make this use the new lora_exec_tx_command_and_receive_response() function
 
 	// TODO handle "Please join network first" response
 	// TODO figure out what's wrong with "Length error"

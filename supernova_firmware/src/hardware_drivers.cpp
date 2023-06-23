@@ -152,7 +152,7 @@ float get_internal_temperature_c() {
 
 }
 
-void do_sensor_test() {
+void log_each_sensor_value() {
 	
 	Serial.printf("SENSOR TEST: probe 1 and 2 voltage: %d mV, %d mV\n", analog_read_mv(PIN_TEMP_SENSE_1), analog_read_mv(PIN_TEMP_SENSE_2));
 	Serial.printf("SENSOR TEST: probe 1 and 2 temperatures: %f C,  %f C\n", get_thermistor_temperature_c(1), get_thermistor_temperature_c(2));
@@ -171,22 +171,25 @@ void do_sensor_test() {
 void gps_update_data() {
 	uint8_t incoming_byte;
 	bool received_data = false;
+	const bool debug_print_raw_gps_data = false;
 	
-	Serial.print("RAW GPS DATA: ");
+	if (debug_print_raw_gps_data) Serial.print("RAW GPS DATA: ");
 
 	while (gps_serial.available() > 0) {
 		incoming_byte = gps_serial.read();
 		gps.encode(incoming_byte);
-		Serial.write(incoming_byte);
+		if (debug_print_raw_gps_data) Serial.write(incoming_byte);
 
 		received_data = true;
 	}
 
-	if (received_data) {
-		Serial.println("\nEND RAW GPS DATA");
-	}
-	else {
-		Serial.println();
+	if (debug_print_raw_gps_data) {
+		if (received_data) {
+			Serial.println("\nEND RAW GPS DATA");
+		}
+		else {
+			Serial.println();
+		}
 	}
 }
 
@@ -201,7 +204,7 @@ uint32_t get_latest_gps_refresh_epoch_time_sec() {
 		ace_time::TimeZone() // UTC
 	);
 
-	return last_gps_fix.toEpochSeconds();
+	return (uint32_t) last_gps_fix.toUnixSeconds64();
 }
 
 // log all GPS info
@@ -333,7 +336,7 @@ struct data_packet_1_t make_data_packet_1(uint16_t packet_seq_num) {
 	data_packet_1.gps_satellite_count = gps.satellites.value();
 	data_packet_1.gps_hdop_cm = gps.hdop.value();
 	data_packet_1.gps_fix_date_epoch_time_sec = get_latest_gps_refresh_epoch_time_sec();
-	data_packet_1.gps_fix_date_age_ms = gps.time.age();
+	data_packet_1.gps_fix_date_age_ms = gps.time.age(); // FIXME this field isn't what we think it is
 
 	return data_packet_1;
 
