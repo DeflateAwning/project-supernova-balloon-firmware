@@ -3,6 +3,7 @@
 #pragma once // only allow include once
 #include "Arduino.h"
 #include "esp_adc_cal.h"
+#include "data_packets.h"
 
 #include <DHT.h>
 #include <SPI.h>
@@ -10,6 +11,7 @@
 #include <Adafruit_BMP280.h>
 #include <HardwareSerial.h>
 #include <TinyGPS++.h>
+#include <AceTime.h>
 
 #define PIN_TEMP_V_PLUS 25
 //#define PIN_ONBOARD_TEMPERATURE_SENSOR 34 // DO NOT USE
@@ -51,10 +53,10 @@ double get_onboard_temperature_c();
 double get_thermistor_temperature_c(int sensor_number);
 
 // reads and returns the DHT22 temperature
-double get_dht22_temperature_c();
+double get_dht_temperature_c();
 
 // reads and returns the DHT22 humidity (from 0 to 100)
-double get_dht22_humidity_rh_pct();
+double get_dht_humidity_rh_pct();
 
 // reads and returns the BMP280 temperature
 double get_bmp280_temperature_c();
@@ -74,8 +76,6 @@ float get_internal_temperature_c();
 // reads and returns the state of the "ready to fly" switch
 bool is_switch_ready_to_fly();
 
-// TODO setup GPS module
-
 // sets the board heater state to either on or off
 void set_board_heater_state(bool turn_on);
 
@@ -93,3 +93,9 @@ void gps_log_all_info();
 
 // gets whether the GPS parser has received a new location
 bool gps_is_location_updated();
+
+// returns number of seconds since the 1970 epoch, based on the latest GPS fix time
+uint32_t get_latest_gps_refresh_epoch_time_sec();
+
+// returns a filled data_packet_1 struct
+struct data_packet_1_t make_data_packet_1();

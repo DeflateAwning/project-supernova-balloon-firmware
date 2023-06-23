@@ -1,13 +1,14 @@
 #include "hardware_drivers.h"
 #include "Arduino.h"
 
-
 DHT dht(PIN_DHT_DATA, DHT_TYPE);
 Adafruit_BMP280 bmp;
 
 HardwareSerial gps_serial(1); // use UART1 (default pins not exposed, but that's actually fine)
 
 TinyGPSPlus gps;
+
+// FIXME implement battery heater controller and duty cycle monitor
 
 void do_pin_init_actions() {
 	Serial.println("Start do_pin_init_actions()");
@@ -107,10 +108,10 @@ double get_thermistor_temperature_c(int sensor_number) {
 	return convert_analog_read_mv_to_temperature_c_stein(analog_read_val_mv);
 }
 
-double get_dht22_temperature_c() {
+double get_dht_temperature_c() {
 	return dht.readTemperature();
 }
-double get_dht22_humidity_rh_pct() {
+double get_dht_humidity_rh_pct() {
 	return dht.readHumidity();
 }
 
@@ -155,8 +156,8 @@ void do_sensor_test() {
 	
 	Serial.printf("SENSOR TEST: probe 1 and 2 voltage: %d mV, %d mV\n", analog_read_mv(PIN_TEMP_SENSE_1), analog_read_mv(PIN_TEMP_SENSE_2));
 	Serial.printf("SENSOR TEST: probe 1 and 2 temperatures: %f C,  %f C\n", get_thermistor_temperature_c(1), get_thermistor_temperature_c(2));
-	Serial.printf("SENSOR TEST: DHT temp %f C\n", get_dht22_temperature_c());
-	Serial.printf("SENSOR TEST: DHT humiditity %lf \n", get_dht22_humidity_rh_pct());
+	Serial.printf("SENSOR TEST: DHT temp %f C\n", get_dht_temperature_c());
+	Serial.printf("SENSOR TEST: DHT humiditity %lf \n", get_dht_humidity_rh_pct());
 	Serial.printf("SENSOR TEST: bmp280 pressure %lf Pa\n",get_bmp280_pressure_pa());
 	Serial.printf("SENSOR TEST: bmp280 temp %lf C\n",get_bmp280_temperature_c());
 	Serial.printf("SENSOR TEST: bmp280 altitude %lf m\n",get_bmp280_altitude());
@@ -189,6 +190,20 @@ void gps_update_data() {
 	}
 }
 
+uint32_t get_latest_gps_refresh_epoch_time_sec() {
+	ace_time::ZonedDateTime last_gps_fix = ace_time::ZonedDateTime::forComponents(
+		gps.date.year(),
+		gps.date.month(),
+		gps.date.day(),
+		gps.time.hour(),
+		gps.time.minute(),
+		gps.time.second(),
+		ace_time::TimeZone() // UTC
+	);
+
+	return last_gps_fix.toEpochSeconds();
+}
+
 // log all GPS info
 void gps_log_all_info() {
 
@@ -207,11 +222,11 @@ void gps_log_all_info() {
 	// Serial.println(gps.location.rawLat().billionths);
 
 	// Raw longitude in whole degrees
-	Serial.print("GPS DATA: Raw longitude = "); 
-	Serial.print(gps.location.rawLng().negative ? "-" : "+");
-	Serial.println(gps.location.rawLng().deg); 
-	// ... and billionths (u16/u32)
-	Serial.println(gps.location.rawLng().billionths);
+	// Serial.print("GPS DATA: Raw longitude = "); 
+	// Serial.print(gps.location.rawLng().negative ? "-" : "+");
+	// Serial.println(gps.location.rawLng().deg); 
+	// // ... and billionths (u16/u32)
+	// Serial.println(gps.location.rawLng().billionths);
 
 	// Raw date in DDMMYY format (u32)
 	Serial.print("GPS DATA: Raw date DDMMYY = ");
@@ -227,6 +242,15 @@ void gps_log_all_info() {
 	Serial.print("GPS DATA: Day = "); 
 	Serial.println(gps.date.day()); 
 
+	// Epoch time
+	Serial.printf(
+		"GPS DATA: Latest fix epoch time = %u sec + %d 100th_of_sec\n",
+		get_latest_gps_refresh_epoch_time_sec(), gps.time.centisecond()
+	);
+	Serial.printf(
+		"GPS DATA: Latest fix age = %d ms\n", gps.time.age()
+	);
+	
 	// Raw time in HHMMSSCC format (u32)
 	Serial.print("GPS DATA: Raw time in HHMMSSCC = "); 
 	Serial.println(gps.time.value()); 
@@ -240,12 +264,12 @@ void gps_log_all_info() {
 	// Second (0-59) (u8)
 	Serial.print("GPS DATA: Second = "); 
 	Serial.println(gps.time.second()); 
-	// 100ths of a second (0-99) (u8)
+	// 100ths of a second (0-99) (u8) [appears to be always 0]
 	Serial.print("GPS DATA: Centisecond = "); 
 	Serial.println(gps.time.centisecond()); 
 
 	// Raw speed in 100ths of a knot (i32)
-	Serial.print("GPS DATA: Raw speed in 100ths/knot = ");
+	Serial.print("GPS DATA: Raw speed in 100ths of a knot = ");
 	Serial.println(gps.speed.value()); 
 	// Speed in meters per second (double)
 	Serial.print("GPS DATA: Speed in m/s = ");
@@ -282,3 +306,35 @@ bool gps_is_location_updated() {
 	return gps.location.isUpdated();
 }
 
+struct data_packet_1_t make_data_packet_1(uint16_t packet_seq_num) {
+	struct data_packet_1_t data_packet_1;
+
+	data_packet_1.packet_type = 1;
+	data_packet_1.millis_since_boot = millis();
+	data_packet_1.packet_seq_num = packet_seq_num;
+
+	data_packet_1.themistor_1_temperature_c = get_thermistor_temperature_c(1);
+	data_packet_1.themistor_2_temperature_c = get_thermistor_temperature_c(2);
+	data_packet_1.dht_temperature_c = get_dht_temperature_c();
+	data_packet_1.dht_humidity_pct = get_dht_humidity_rh_pct();
+	data_packet_1.bmp_pressure_pa = get_bmp280_pressure_pa();
+	data_packet_1.bmp_temperature_c = get_bmp280_temperature_c();
+	data_packet_1.battery_voltage_mv = get_battery_voltage();
+	data_packet_1.mcu_internal_temperature_c = get_internal_temperature_c();
+	data_packet_1.is_switch_rtf = is_switch_ready_to_fly();
+
+	// TODO add heater power on pct
+
+	data_packet_1.gps_latitude_degrees_x1e6 = gps.location.lat() * 1e6;
+	data_packet_1.gps_longitude_degrees_x1e6 = gps.location.lng() * 1e6;
+	data_packet_1.gps_altitude_cm = gps.altitude.value();
+	data_packet_1.gps_speed_100ths_of_knot = gps.speed.value();
+	data_packet_1.gps_course_100ths_of_degree = gps.course.value();
+	data_packet_1.gps_satellite_count = gps.satellites.value();
+	data_packet_1.gps_hdop_cm = gps.hdop.value();
+	data_packet_1.gps_fix_date_epoch_time_sec = get_latest_gps_refresh_epoch_time_sec();
+	data_packet_1.gps_fix_date_age_ms = gps.time.age();
+
+	return data_packet_1;
+
+}

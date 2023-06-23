@@ -144,3 +144,4 @@ void lora_send_str_and_seq(const char* str_to_send) {
 	// TODO figure out what's wrong with "Length error"
 
 }
+

@@ -8,20 +8,19 @@ void setup() {
 	Serial.begin(115200);
 	Serial.println("Start setup().");
 
-	// init the LEDs
+	// init the 
 	do_pin_init_actions();
 	init_lora_serial();
+
+	packet_debug_log_sizes();
 
 	delay(2000); // wait for LoRa boot
 	lora_do_test_and_log();
 	lora_set_private_config();
-
-	// receive back the device IDs
-	lora_exec_command_and_receive_response("AT+ID", 1000);
-
+	lora_exec_command_and_receive_response("AT+ID", 1000); // receive back the device IDs
 	lora_set_network_config();
-
 	lora_join();
+
 
 	Serial.println("Done setup().");
 }
