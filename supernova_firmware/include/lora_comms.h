@@ -22,3 +22,5 @@ void lora_exec_tx_command_and_receive_response(const char* at_command_str, const
 void lora_exec_command_and_receive_response(const char* command_str, uint16_t delay_ms);
 void lora_exec_command_and_receive_response(const char* command_str, char* result_dest, uint16_t delay_ms);
 
+// set the DR (data rate) for LoRa; directly impacts the maximum packet length
+void lora_set_dr(uint8_t dr);

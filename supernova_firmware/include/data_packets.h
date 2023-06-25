@@ -9,6 +9,7 @@ struct data_packet_1_t
 	uint8_t packet_type; // always 1 for this struct
 	uint32_t millis_since_boot;
 	uint16_t packet_seq_num;
+	uint8_t lora_dr_value;
 
 	int8_t themistor_1_temperature_c;
 	int8_t themistor_2_temperature_c;

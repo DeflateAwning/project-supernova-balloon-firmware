@@ -32,7 +32,7 @@ void do_pin_init_actions() {
 	analogSetCycles(32); // default is 8
 	// analogSetAttenuation(...); // default is 11dB
 
-	digitalWrite(PIN_TEMP_V_PLUS, 1); // TODO move this to read function maybe
+	digitalWrite(PIN_TEMP_V_PLUS, HIGH); // NOTE: could move this to read function for best power efficiency
 
 	 bmp.begin(0x76);
 	 bmp.setSampling(
@@ -300,7 +300,7 @@ void gps_log_all_info() {
 	Serial.println(gps.satellites.value()); 
 
 	// Horizontal Dim. of Precision (100ths-i32)
-	Serial.print("GPS DATA: HDOP (cm) = "); // TODO confirm the unit is cm
+	Serial.print("GPS DATA: HDOP (cm) = ");
 	Serial.println(gps.hdop.value());
 
 }
@@ -309,12 +309,13 @@ bool gps_is_location_updated() {
 	return gps.location.isUpdated();
 }
 
-struct data_packet_1_t make_data_packet_1(uint16_t packet_seq_num) {
+struct data_packet_1_t make_data_packet_1(uint16_t packet_seq_num, uint8_t lora_dr_value) {
 	struct data_packet_1_t data_packet_1;
 
 	data_packet_1.packet_type = 1;
 	data_packet_1.millis_since_boot = millis();
 	data_packet_1.packet_seq_num = packet_seq_num;
+	data_packet_1.lora_dr_value = lora_dr_value;
 
 	data_packet_1.themistor_1_temperature_c = get_thermistor_temperature_c(1);
 	data_packet_1.themistor_2_temperature_c = get_thermistor_temperature_c(2);
@@ -327,6 +328,7 @@ struct data_packet_1_t make_data_packet_1(uint16_t packet_seq_num) {
 	data_packet_1.is_switch_rtf = is_switch_ready_to_fly();
 
 	// TODO add heater power on pct
+	// TODO add uplinked time field
 
 	data_packet_1.gps_latitude_degrees_x1e6 = gps.location.lat() * 1e6;
 	data_packet_1.gps_longitude_degrees_x1e6 = gps.location.lng() * 1e6;

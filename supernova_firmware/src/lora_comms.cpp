@@ -92,7 +92,7 @@ void lora_exec_command_and_receive_response(const char* command_str, char* resul
 	LoraSerial.println(command_str); // println executes it
 	LoraSerial.flush();
 
-	delay(delay_ms);
+	delay(delay_ms); // TODO shorten this delay, looking for "+JOIN: Joined already" or ": Done"
 	
 	// receive the response
 	receive_uart_data(LoraSerial, result_dest);
@@ -137,7 +137,7 @@ void lora_set_network_config() {
 	LoraSerial.println("Start lora_set_network_config()");
 
 	lora_exec_command_and_receive_response("AT+DR=US915", 500);
-	lora_exec_command_and_receive_response("AT+DR=DR2", 500); // TODO remove this hard-code, and instead cycle through them
+	lora_set_dr(2); // TODO remove this hard-code, and instead cycle through them
 	// lora_exec_command_and_receive_response("AT+DR=SF10", 500); // lower spreading factor = lower transmission range (but it's set through the DRx command)
 	lora_exec_command_and_receive_response("AT+CH=NUM,8-15", 500);
 	lora_exec_command_and_receive_response("AT+MODE=LWOTAA", 500);
@@ -151,6 +151,12 @@ void lora_set_network_config() {
 
 	LoraSerial.println("Done lora_set_network_config()");
 
+}
+
+void lora_set_dr(uint8_t dr) {
+	char command_to_send[MAX_LORA_RESPONSE_LENGTH];
+	sprintf(command_to_send, "AT+DR=DR%d", dr);
+	lora_exec_command_and_receive_response(command_to_send, 500);
 }
 
 void lora_join() {

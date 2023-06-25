@@ -3,6 +3,7 @@
 void data_packet_1_to_hex_string(struct data_packet_1_t packet, char* hex_str_buffer) {
 	uint8_t size_of_packet = sizeof(packet);
 
+	// Source: https://stackoverflow.com/a/43242170
 	// convert to byte array
 	char* buffer = new char[size_of_packet];
     memset(buffer, 0x00, size_of_packet);
@@ -37,6 +38,7 @@ void log_data_packet_1_to_serial(struct data_packet_1_t packet) {
 	Serial.printf("PACKET 1: packet_type = %d\n", packet.packet_type);
 	Serial.printf("PACKET 1: millis_since_boot = %d\n", packet.millis_since_boot);
 	Serial.printf("PACKET 1: packet_seq_num = %d\n", packet.packet_seq_num);
+	Serial.printf("PACKET 1: lora_dr_value = %d\n", packet.lora_dr_value);
 	Serial.printf("PACKET 1: themistor_1_temperature_c = %d\n", packet.themistor_1_temperature_c);
 	Serial.printf("PACKET 1: themistor_2_temperature_c = %d\n", packet.themistor_2_temperature_c);
 	Serial.printf("PACKET 1: dht_temperature_c = %d\n", packet.dht_temperature_c);

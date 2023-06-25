@@ -5,6 +5,7 @@
 // TODO add hourly reboot, just in case
 
 uint16_t data_packet_1_seq_number = 0; // wrap-around is fine
+uint8_t lora_dr_value = 2;
 
 // the setup function runs once when you press reset or power the board
 void setup() {
@@ -71,7 +72,7 @@ void loop() {
 	lora_exec_command_and_receive_response("AT+LW=LEN", 500);
 
 	// generate and send the packet
-	struct data_packet_1_t packet_1 = make_data_packet_1(data_packet_1_seq_number++);
+	struct data_packet_1_t packet_1 = make_data_packet_1(data_packet_1_seq_number++, lora_dr_value);
 	char packet_1_hex_str[MAX_DATA_PACKET_HEX_STRING_LENGTH];
 	data_packet_1_to_hex_string(packet_1, packet_1_hex_str);
 	log_data_packet_1_to_serial(packet_1);

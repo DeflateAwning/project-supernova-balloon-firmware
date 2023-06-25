@@ -98,4 +98,4 @@ bool gps_is_location_updated();
 uint32_t get_latest_gps_refresh_epoch_time_sec();
 
 // returns a filled data_packet_1 struct
-struct data_packet_1_t make_data_packet_1(uint16_t packet_seq_num);
+struct data_packet_1_t make_data_packet_1(uint16_t packet_seq_num, uint8_t lora_dr_value);
